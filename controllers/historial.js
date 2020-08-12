@@ -1,6 +1,3 @@
-/**
- * Created by Raul Perez on 21/04/2017.
- */
 'use strict'
 
 const MovimientoModel = require('../models/movimiento'),
@@ -15,7 +12,7 @@ const MovimientoModel = require('../models/movimiento'),
 function historialMovimientosGet(req, res) {
     let usuario = req.session.user
 
-    if( usuario.permisos === 1){ // si es administrador de sucursales
+    if( usuario.permisos === 1){
         CategoriaModel.getNamesOfCategories((error, categorias) => {
             (error) ? (
                 Utilidad.printError(res, {msg:`Error al obtener las categorias: ${error}`,tipo: 0})
@@ -23,7 +20,7 @@ function historialMovimientosGet(req, res) {
                 res.render('./historial/movimientos',{ usuario, categorias })
             )
         })
-    }else{ // si es administrador general
+    }else{ 
         CategoriaModel.getNamesOfCategories((error, categorias) => {
             (error) ? (
                 Utilidad.printError(res, {msg:`Error al obtener las categorias: ${error}`,tipo: 0})
@@ -48,7 +45,7 @@ function historialMovimientosPost(req, res) {
         categoria = req.body.categoria,
         plaza = (usuario.permisos === 1) ? null : req.body.plaza
 
-    if( usuario.permisos === 1){ // si es administrador de sucursales
+    if( usuario.permisos === 1){
         MovimientoModel.getMovimientosNoBasicosByIdSucursalAndCategoria(idSucursal, categoria, inicio, final, (error, movimientos) => {
             if(error){
                 Utilidad.printError(res, {msg:`Error al obtener los movimientos: ${error}`, tipo: 0}) 
@@ -62,7 +59,7 @@ function historialMovimientosPost(req, res) {
                 })
             }
         })
-    }else{ // si es administrador general
+    }else{ 
         MovimientoModel.getMovimientosNoBasicosByPlazaAndCategoria(plaza, categoria, inicio, final, (error, movimientos) => {
             if(error){
                 Utilidad.printError(res, {msg:`Error al obtener los movimientos: ${error}`, tipo: 0}) 
@@ -82,7 +79,7 @@ function historialMovimientosPost(req, res) {
 function historialBajasGet(req, res) {
     let usuario = req.session.user
 
-    if( usuario.permisos === 1){ // si es administrador de sucursales
+    if( usuario.permisos === 1){ 
         CategoriaModel.getNamesOfCategories((error, categorias) => {
             (error) ? (
                 Utilidad.printError(res, {msg:`Error al obtener las categorias: ${error}`,tipo: 0})
@@ -90,7 +87,7 @@ function historialBajasGet(req, res) {
                 res.render('./historial/bajas',{ usuario, categorias })
             )
         })
-    }else{ // si es administrador general
+    }else{ 
         CategoriaModel.getNamesOfCategories((error, categorias) => {
             (error) ? (
                 Utilidad.printError(res, {msg:`Error al obtener las categorias: ${error}`,tipo: 0})
@@ -115,7 +112,7 @@ function historialBajasPost(req, res){
         categoria = req.body.categoria,
         plaza = (usuario.permisos === 1) ? null : req.body.plaza
 
-    if( usuario.permisos === 1){ // si es administrador de sucursales
+    if( usuario.permisos === 1){
         BajaModel.getBajasNoBasicosByIdSucursalAndCategoria(idSucursal, categoria, inicio, final, (error, bajas) => {
             if(error){
                 Utilidad.printError(res, {msg:`Error al obtener los movimientos: ${error}`, tipo: 0})
@@ -129,7 +126,7 @@ function historialBajasPost(req, res){
                 })
             }
         })
-    }else{ // si es administrador general
+    }else{ 
         BajaModel.getBajasNoBasicosByPlazaAndCategoria(plaza, categoria, inicio, final, (error, bajas) => {
             if(error){
                 Utilidad.printError(res, {msg:`Error al obtener los movimientos: ${error}`, tipo: 0})
@@ -158,7 +155,6 @@ function historialSucursalGet(req, res) {
 }
 
 function historialSucursalTopPost(req, res) {
-    // obtengo las fechas
     let inicio = req.body.iniciot,
         final = sumarDia( req.body.finalt ),
         idSucursal = req.session.user.idSucursal
@@ -171,13 +167,11 @@ function historialSucursalTopPost(req, res) {
 }
 
 function historialSucursalBasicosPost(req, res) {
-    // obtengo las fechas
     let inicio = req.body.iniciob,
         final = sumarDia( req.body.finalb ),
         idSucursal = req.session.user.idSucursal,
         codigoProducto = getCodigoByName(req.session.basicos, req.body.basico)
 
-    // obtener el id del producto a comparar
     ProductoModel.getIdProductoByCode(codigoProducto,(error, producto) => {
         if(!error){
             EstadisticaModel.getComparacion(idSucursal, producto.idProducto, inicio, final, (error, comparacion) => {
@@ -207,12 +201,10 @@ function historialGeneralGet(req, res) {
 }
 
 function historialGeneralTopPost(req, res) {
-    // obtengo las fechas
     let inicio = req.body.iniciot,
         final = sumarDia( req.body.finalt ),
         sucursal = req.body.sucursaltop
 
-    // busco la sucursal por el nombre de la plaza
     SucursalModel.getIdSucursalByPlaza(sucursal, (error, idSucursal) => {
         if(!error){
             EstadisticaModel.getTopTen(idSucursal, inicio, final, (error, topten) => {
@@ -225,7 +217,6 @@ function historialGeneralTopPost(req, res) {
 }
 
 function historialGeneralBasicosPost(req, res) {
-    // obtengo las fechas
     let inicio = req.body.iniciob,
         final = sumarDia( req.body.finalb ),
         sucursal = req.body.sucursalbas,
@@ -233,7 +224,6 @@ function historialGeneralBasicosPost(req, res) {
 
     SucursalModel.getIdSucursalByPlaza(sucursal, (error, idSucursal) => {
         if(!error){
-            // obtener el id del producto a comparar
             ProductoModel.getIdProductoByCode(codigoProducto,(error, producto) => {
                 if(!error) {
                     EstadisticaModel.getComparacion(idSucursal, producto.idProducto, inicio, final, (error, comparacion) => {
@@ -259,12 +249,11 @@ function getCodigoByName(basicos, nombre){
     let productos = basicos,
         longitud = productos.length,
         codigo = null
-    // busca el codigo del producto
     for(let i = 0; i < longitud ; i++){
         let producto = productos[i]
         if(producto.nombre === nombre){
-            codigo = producto.codigo // obtengo el codigo del producto basico
-            i = longitud // termino el ciclo
+            codigo = producto.codigo 
+            i = longitud 
         }
     }
 

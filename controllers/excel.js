@@ -1,10 +1,7 @@
-/**
- * Created by Raul Perez on 22/04/2017.
- */
 'use strict'
 
 const   multer = require('multer'),
-        storage = multer.diskStorage({ //multers disk storage settings
+        storage = multer.diskStorage({ 
             destination: function (req, file, cb) {
                 cb(null, './uploads/')
             },
@@ -13,9 +10,9 @@ const   multer = require('multer'),
                 cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
             }
         }),
-        upload = multer({ //multer settings
+        upload = multer({ 
             storage: storage,
-            fileFilter : function(req, file, callback) { //file filter
+            fileFilter : function(req, file, callback) { 
                 if (['xls', 'xlsx'].indexOf(file.originalname.split('.')[file.originalname.split('.').length-1]) === -1) {
                     return callback(new Error('Wrong extension type'))
                 }

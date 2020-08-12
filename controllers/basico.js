@@ -1,6 +1,3 @@
-/**
- * Created by Raul Perez on 21/04/2017.
- */
 'use strict'
 
 const ProductoModel = require("../models/producto"),
@@ -13,15 +10,14 @@ const ProductoModel = require("../models/producto"),
 
 function basicosGet(req, res) {
     let usuario = req.session.user
-    // busco las tecnicas de la sucursal del usuario
     TecnicaModel.getTecnicasNameBySucursal(usuario.idSucursal, (error, tecnicas) => {
-        if(error){ // si hubo error
+        if(error){ 
             Utilidad.printError(res, {msg:`Error al obtener las tecnicas: ${error}`, tipo: 0})
         }else{
             ProductoModel.getProductsBasicos( (error, productos) =>{
-                (error) ? ( // si hubo error
+                (error) ? ( 
                     Utilidad.printError(res, {msg:`Error al obtener los productos: ${error}`, tipo: 0})
-                ) : ( // no hubo error
+                ) : (
                     req.session.productos = productos,
                     res.render("./basicos/manager",{ usuario, tecnicas ,productos })
                 )
@@ -31,7 +27,6 @@ function basicosGet(req, res) {
 }
 
 function basicosPut(req, res) {
-    // si se le asigna un producto
     let usuario = req.session.user,
         codigoProducto = getCodigoByName(req.session.productos ,req.body.producto),
         nombreTecnica = req.body.tecnica,
@@ -39,15 +34,12 @@ function basicosPut(req, res) {
         idTecnica = null,
         idProducto = null,
         promesa = new Promise((resolve, reject) =>{
-            // busco el id de la tecnica
             TecnicaModel.getIdTecnicaByFullNameAndIdSucursal(nombreTecnica, usuario.idSucursal,(error, idTecnica) => {
                 return(error) ? ( reject({msg:`Error al obtener el id de la tecnica: ${error}`, tipo: 0}) ) : ( resolve(idTecnica) )
             })
         })
 
-    // sigo con las promesas
     promesa
-            // busco el id del producto
             .then(resolved => {
                 idTecnica = resolved
                 return new Promise((resolve, reject) => {
@@ -56,7 +48,6 @@ function basicosPut(req, res) {
                     })
                 })
             })
-            // busco el 'basico en uso' del producto con el id del producto y el id de la tecnica
             .then(resolved => {
                 idProducto = resolved.idProducto
                 return new Promise((resolve, reject) => {
@@ -68,10 +59,8 @@ function basicosPut(req, res) {
             .then(resolved => {
                 return new Promise((resolve, reject) => {
                     if(resolved.enUso){
-                        // mandar alerta que esta en uso
                         reject({msg:`Error el producto esta en uso`, tipo: 11})
                     } else {
-                        // busco el almacen para poder comprobar si tiene productos
                         AlmacenModel.getAlmacenBySucursalAndProduct(usuario.idSucursal, idProducto, (error, almacen) => {
                             return(error) ? ( reject({msg:`Error al obtener el almacen: ${error}`, tipo: 0}) ) : ( resolve(almacen) )
                         })
@@ -82,21 +71,18 @@ function basicosPut(req, res) {
                 almacen = resolved
                 return new Promise((resolve, reject) => {
                     if(almacen.cantidadAlmacen > 0){
-                        // se hacen los cambios necesarios
                         almacen.cantidadAlmacen--
                         almacen.cantidadConsumo++
                         AlmacenModel.updateAlmacen(almacen, error => {
                             return(error) ? ( reject({msg:`Error al actualizar el almacen: ${error}`,tipo: 0}) ) : (resolve(true))
                         })
                     } else {
-                        // se manda una alerta de que no hay productos
                         reject({msg:`Error no hay productos disponibles`, tipo: 12})
                     }
                 })
             })
             .then(resolved => {
                 return new Promise((resolve, reject) => {
-                    // se genera el movimiento
                     let movimiento = {
                         idUsuario: usuario.idUsuario,
                         idTecnica,
@@ -110,7 +96,6 @@ function basicosPut(req, res) {
             })
             .then(resolved => {
                 return new Promise((resolve, reject) => {
-                    // se actualiza el basico de la tecnica
                     let basico = {
                         idTecnica,
                         idProducto,
@@ -122,7 +107,6 @@ function basicosPut(req, res) {
                 })
             })
             .then(resolved => {
-                // se asigno correctamente y se manda una alerta
                 res.send({msg:`Producto asignado correctamente`, tipo: 13})
             })
             .catch(error => {
@@ -131,7 +115,6 @@ function basicosPut(req, res) {
 }
 
 function basicosDelete(req, res) {
-    // si se le asigna un producto
     let usuario = req.session.user,
         codigoProducto = getCodigoByName(req.session.productos ,req.body.producto),
         nombreTecnica = req.body.tecnica,
@@ -139,15 +122,12 @@ function basicosDelete(req, res) {
         idTecnica = null,
         idProducto = null,
         promesa = new Promise((resolve, reject) =>{
-            // busco el id de la tecnica
             TecnicaModel.getIdTecnicaByFullNameAndIdSucursal(nombreTecnica, usuario.idSucursal,(error, idTecnica) => {
                 return(error) ? ( reject({msg:`Error al obtener el id de la tecnica: ${error}`, tipo: 0}) ) : ( resolve(idTecnica) )
             })
         })
 
-    // sigo con las promesas
     promesa
-    // busco el id del producto
         .then(resolved => {
             idTecnica = resolved
             return new Promise((resolve, reject) => {
@@ -156,7 +136,6 @@ function basicosDelete(req, res) {
                 })
             })
         })
-        // busco el 'basico en uso' del producto con el id del producto y el id de la tecnica
         .then(resolved => {
             idProducto = resolved.idProducto
             return new Promise((resolve, reject) => {
@@ -168,12 +147,10 @@ function basicosDelete(req, res) {
         .then(resolved => {
             return new Promise((resolve, reject) => {
                 if(resolved.enUso){
-                    // busco el almacen para poder comprobar si tiene productos
                     AlmacenModel.getAlmacenBySucursalAndProduct(usuario.idSucursal, idProducto, (error, almacen) => {
                         return(error) ? ( reject({msg:`Error al obtener el almacen: ${error}`, tipo: 0}) ) : ( resolve(almacen) )
                     })
                 } else {
-                    // mandar alerta que esta en uso
                     reject({msg:`Error el producto no esta en uso`, tipo: 21})
                 }
             })
@@ -181,7 +158,6 @@ function basicosDelete(req, res) {
         .then(resolved => {
             almacen = resolved
             return new Promise((resolve, reject) => {
-                // se hacen los cambios necesarios
                 almacen.cantidadConsumo--
                 AlmacenModel.updateAlmacen(almacen, error => {
                     return(error) ? ( reject({msg:`Error al actualizar el almacen: ${error}`,tipo: 0}) ) : (resolve(true))
@@ -190,7 +166,6 @@ function basicosDelete(req, res) {
         })
         .then(resolved => {
             return new Promise((resolve, reject) => {
-                // se genera el movimiento
                 let baja = {
                     idUsuario: usuario.idUsuario,
                     idTecnica,
@@ -204,7 +179,6 @@ function basicosDelete(req, res) {
         })
         .then(resolved => {
             return new Promise((resolve, reject) => {
-                // se actualiza el basico de la tecnica
                 let basico = {
                     idTecnica,
                     idProducto,
@@ -216,7 +190,6 @@ function basicosDelete(req, res) {
             })
         })
         .then(resolved => {
-            // se asigno correctamente y se manda una alerta
             res.send({msg:`Baja realizada correctamente`, tipo: 23})
         })
         .catch(error => {
@@ -228,12 +201,11 @@ function getCodigoByName(basicos, nombre){
     let productos = basicos,
         longitud = productos.length,
         codigo = null
-    // busca el codigo del producto
     for(let i = 0; i < longitud ; i++){
         let producto = productos[i]
         if(producto.nombre === nombre){
-            codigo = producto.codigo // obtengo el codigo del producto basico
-            i = longitud // termino el ciclo
+            codigo = producto.codigo 
+            i = longitud
         }
     }
 
@@ -241,9 +213,9 @@ function getCodigoByName(basicos, nombre){
 }
 
 function fechaActual(){
-    let fecha = new Date(); // obtengo la fecha actual
-    fecha.setHours(fecha.getHours() - 7) // le resto 7 horas a la hora actual
-    return fecha // regreso la fecha
+    let fecha = new Date(); 
+    fecha.setHours(fecha.getHours() - 7) 
+    return fecha
 }
 
 module.exports = {

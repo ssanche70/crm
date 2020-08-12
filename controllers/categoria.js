@@ -1,14 +1,10 @@
-/**
- * Created by Raul Perez on 12/04/2017.
- */
 'use strict'
 
 const CategoryModel = require('../models/categoria'),
       Utilidad = require('../ayuda/utilidad')
 
 function categoriesGet(req, res) {
-    // busco todas las categorias
-    CategoryModel.getCategories( (error, categorias) => { // si no hubo error
+    CategoryModel.getCategories( (error, categorias) => { 
         (error) ? (
             Utilidad.printError(res, { msg: `Error al obtener las categorias: ${error}`, tipo: 0})
         ) : (
@@ -22,13 +18,11 @@ function categoriesNewGet(req, res) {
 }
 
 function categoriesNewPost(req, res) {
-    // creo la nueva categoria
     let nuevaCategoria = {
         nombre: req.body.nombre,
         descripcion: req.body.descripcion
     }
-    // guardo la nueva categoria
-    CategoryModel.createCategory(nuevaCategoria, error => { // si no hubo error
+    CategoryModel.createCategory(nuevaCategoria, error => { 
         (error) ? (
             Utilidad.printError(res, { msg: `Error al agregar la nueva categoria: ${error}`, tipo: 1})
         ) : (
@@ -39,8 +33,7 @@ function categoriesNewPost(req, res) {
 
 function categoriesIdCategoryGet(req, res) {
     let idCategory = req.params.idCategoria
-    // busco la categoria 
-    CategoryModel.getCategoryById(idCategory, (error, categoryUpdate) => { // si no hubo error
+    CategoryModel.getCategoryById(idCategory, (error, categoryUpdate) => { 
         if(error){
             Utilidad.printError(res, { msg: `Error al obtener la categoria: ${error}`, tipo: 0})
         }else{
@@ -60,12 +53,10 @@ function categoriesIdCategoryPut(req, res) {
         nombre: req.body.nombre,
         descripcion: req.body.descripcion
     }
-    // actualizo la categoria en la base de datos
-    CategoryModel.updateCategory(categoriaUpdate, error => { // si no hubo error
+    CategoryModel.updateCategory(categoriaUpdate, error => { 
         (error) ? (
             Utilidad.printError(res, { msg: `Error al actualizar la categoria: ${error}`, tipo: 1})
         ) : (
-            //res.redirect('/categories')
             res.json({msg:"",tipo:3})
         )
     })
@@ -73,7 +64,6 @@ function categoriesIdCategoryPut(req, res) {
 
 function categoriesIdCategoryDelete(req, res) {
     let idCategoria = req.params.idCategoria
-    // borramos la categoria
     CategoryModel.deleteCategory(idCategoria, error => {
         if(error) Utilidad.printError(res, {msg:`Error al borrar la categoria`, tipo: 0})
         res.redirect('/categories')
