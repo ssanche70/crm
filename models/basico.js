@@ -1,6 +1,3 @@
-/**
- * Created by Raul Perez on 30/04/2017.
- */
 'use strict'
 
 const BasicoModel = require('./coneccion')

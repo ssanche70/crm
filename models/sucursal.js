@@ -1,6 +1,3 @@
-/**
- * Created by Raul Perez on 11/04/2017.
- */
 'use strict'
 
 const SucursalModel = require('./coneccion')
@@ -20,9 +17,9 @@ function getIdSucursalByPlaza(plaza, next) {
         .query(`SELECT s.idSucursal 
                 FROM sucursales s 
                 WHERE s.plaza = ?`,  plaza, (error, resultado, fields) => {
-            try{ // si suerge un error es de la base de datos
+            try{ 
                 next(error, resultado[0].idSucursal)
-            }catch(error){ // si no se encontro sucursal
+            }catch(error){ 
                 next(error = null, 0)
             }        
         })

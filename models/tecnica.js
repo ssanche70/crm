@@ -1,6 +1,3 @@
-/**
- * Created by Raul Perez on 12/04/2017.
- */
 'use strict'
 
 const TecnicaModel = require('./coneccion')
