@@ -1,0 +1,84 @@
+extends ../layout.pug
+block contenido
+
+  #page-wrapper
+    .row
+      .col-lg-12
+        h3.page-header Productos en consumo
+    .row
+      .col-lg-10.col-lg-offset-1
+        form( id="formconsumo", style="display:inline", action="/consumos", method="POST")
+          .form-groups
+            .panel-body
+              .col-lg-4
+              .col-lg-4
+                if usuario.permisos === 2
+                  label Sucursal:
+                  select.form-control(id="sucursal" name="plaza" )
+                    for sucursal in sucursales
+                      option(name="1") #{sucursal.plaza}
+              .col-lg-4
+                label Categoría:
+                select.form-control(id="categoria" name="categoria" )
+                  for categoria in categorias
+                    option(name="1") #{categoria.nombre}      
+    .row
+      .col-lg-12
+        .panel.panel-default
+          .panel-heading
+            | Productos
+          .panel-body
+            table#dataTables-example.table.table-striped.table-bordered.table-hover
+              thead
+                tr
+                  th Código
+                  th Nombre
+                  th Cantidad
+                  if usuario.permisos < 2
+                    th Acción
+              tbody
+    
+  // jQuery
+  script(src='/public/dataTables/jquery/jquery.js') 
+  // Bootstrap Core JavaScript
+  script(src='/public/vendor/bootstrap/js/bootstrap.min.js')
+  // Metis Menu Plugin JavaScript
+  script(src='/public/vendor/metisMenu/metisMenu.min.js')
+  // DataTables JavaScript
+  script(src='/public/dist/js/sb-admin-2.js')
+  script(src='/public/stuk/dist/jszip.min.js')  
+  script(src='/public/dataTables/media/js/jquery.dataTables.min.js')
+  script(src='/public/dataTables/media/js/dataTables.bootstrap.min.js')
+  script(src='/public/dataTables/extensions/Responsive/js/dataTables.responsive.js')
+  script(src='/public/dataTables/extensions/Buttons/js/dataTables.buttons.min.js')
+  script(src='/public/dataTables/extensions/Buttons/js/buttons.html5.min.js')
+  script(src='/public/pdfmake/build/pdfmake.min.js')
+  script(src='/public/pdfmake/build/vfs_fonts.js') 
+  script.
+    $('#dataTables-example').DataTable({
+        responsive: true,
+        dom: 'Bfrtip',
+        buttons: [
+             {
+                extend: 'excelHtml5',
+                title: 'Consumo',
+                exportOptions: {
+                    columns: [ 0, 1, 2 ]
+                }
+            },
+            {
+                extend: 'pdf',
+                title: 'Consumo',
+                exportOptions: {
+                    columns: [ 0, 1, 2 ]
+                }
+            }
+        ]
+    });
+
+  if usuario.permisos < 2 
+      script(src='/public/data/getConsumoNormal.js')
+  else
+
+    script(src='/public/data/getConsumoGeneral.js')  
+      
